@@ -24,10 +24,15 @@ RUN curl -f -LO --retry 3 --retry-delay 3 https://storage.googleapis.com/kuberne
 RUN curl -f -o /usr/local/bin/aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/${KUBECTL_RELEASE}/${AWS_BINARY_RELEASE_DATE}/bin/linux/amd64/aws-iam-authenticator && \
   chmod +x /usr/local/bin/aws-iam-authenticator
 
-RUN chmod +x ./gradlew && ./gradlew install
+RUN mkdir /tmp/halyard
+
+COPY . /tmp/halyard
+
+RUN cd /tmp/halyard && ./gradlew install && cp -r halyard-web/build/install/halyard /opt/halyard
+
+RUN rm -rf /tmp/halyard
 
 RUN adduser --system --uid 1000 --group spinnaker
-COPY halyard-web/build/install/halyard /opt/halyard
 USER spinnaker
 
 CMD ["/opt/halyard/bin/halyard"]
